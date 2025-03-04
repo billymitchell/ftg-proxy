@@ -3,11 +3,24 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const path = require('path'); // added dependency
+const winston = require('winston');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Setup Winston logger for robust error logging
+const logger = winston.createLogger({
+  level: 'error',
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'error.log' })
+  ],
+});
+
 // Secure headers
 app.use(helmet());
+
+// Trust the first proxy (required for rate-limiting behind proxies)
+app.set('trust proxy', 1);
 
 // Set up CORS
 const allowedOrigins = [
@@ -15,7 +28,6 @@ const allowedOrigins = [
   /^https?:\/\/(www\.)?ftg-redemption\.mybrightsites\.com$/,
   /^https?:\/\/(www\.)?redeem\.forbestravelguide\.com$/
 ];
-
 app.use(cors({
   origin: function (origin, callback) {
     if (allowedOrigins.some(regex => regex.test(origin)) || !origin) {
@@ -49,13 +61,14 @@ const receiveOrderData = require('./routes/receiveOrderData');
 app.use('/api/redemption-code-status', getRedemptionStatus);
 app.use('/api', receiveOrderData);
 
-// Error handling middleware
+// Error handling middleware with robust logging
 app.use((err, req, res, next) => {
-  if (err) {
-    res.status(500).json({ error: err.message });
-  } else {
-    next();
-  }
+  // Log detailed error information to the console and error.log file
+  logger.error(`${new Date().toISOString()} - Error: ${err.message} - ${req.method} ${req.url}`, { 
+    stack: err.stack 
+  });
+  // Respond with a generic error message
+  res.status(500).json({ error: 'An internal server error occurred. Please try again later.' });
 });
 
 // Start the server
