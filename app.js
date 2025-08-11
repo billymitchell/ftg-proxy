@@ -76,11 +76,13 @@ app.use(limiter);
 // Import route modules for handling API requests
 const getRedemptionStatus = require('./routes/getRedemptionStatus');
 const receiveOrderData = require('./routes/receiveOrderData');
+const queryAirtable = require('./routes/queryAirtable');
 
 // Use the API routes
 // Endpoints for handling redemption code status and order data.
 app.use('/api/redemption-code-status', getRedemptionStatus);
 app.use('/api', receiveOrderData);
+app.use('/api', queryAirtable);
 
 // Global error handling middleware with robust logging
 // This middleware catches errors thrown from any part of the application.
