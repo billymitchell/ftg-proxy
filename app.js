@@ -41,7 +41,10 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   /^https?:\/\/(www\.)?ftg-redemption-test\.mybrightsites\.com$/,
   /^https?:\/\/(www\.)?ftg-redemption\.mybrightsites\.com$/,
-  /^https?:\/\/(www\.)?redeem\.forbestravelguide\.com$/
+  /^https?:\/\/(www\.)?redeem\.forbestravelguide\.com$/,
+  // Newly added ftg-test subdomain(s) for testing environment
+  /^https?:\/\/(www\.)?ftg-test\.forbestravelguide\.com$/,
+  /^https?:\/\/(www\.)?ftg-test\.mybrightsites\.com$/
 ];
 app.use(cors({
   origin: function (origin, callback) {
