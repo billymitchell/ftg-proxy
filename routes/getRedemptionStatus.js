@@ -16,15 +16,9 @@ router.get('/:redemptionCode', async (req, res) => {
   // First, check if the cache contains data for the given redemption code.
   // This helps reduce redundant calls to the Airtable API.
   const cachedStatus = cache.get(redemptionCode);
-  if (cachedStatus && cachedStatus.status && cachedStatus.status.recordId) {
+  if (cachedStatus) {
     // If a valid cache record exists, return the cached response immediately.
-    return res.json({
-      redemptionCode: cachedStatus.redemptionCode,
-      establishmentName: cachedStatus.establishmentName,
-      establishmentType: cachedStatus.establishmentType,
-      awardLevel: cachedStatus.awardLevel,
-      redemptionStatus: cachedStatus.redemptionStatus,
-    });
+    return res.json(cachedStatus);
   }
 
   try {
@@ -33,28 +27,30 @@ router.get('/:redemptionCode', async (req, res) => {
     if (records.length > 0) {
       // If one or more records are returned from Airtable, use the first record.
       const record = records[0];
-      // Retrieve the 'Status' field and the record ID from the retrieved record.
-      const status = record.get('Status');
-      const recordId = record.id;
+
+      // Helper to pick the first available field name from a list of candidates
+      const pickField = (rec, names) => {
+        for (const n of names) {
+          const v = rec.get(n);
+          if (v !== undefined && v !== null && v !== '') return v;
+        }
+        return undefined;
+      };
+
+      const responsePayload = {
+        redemptionCode: record.get('Redemption Code'),
+        establishmentName: pickField(record, ['Establishment Name', 'Official Establishment Name']),
+        establishmentType: record.get('Establishment Type'),
+        awardLevel: record.get('Award Level'),
+        redemptionStatus: record.get('Redemption Status'),
+      };
 
       // Cache the retrieved record for future requests. This helps in improving performance
       // by reducing the number of API calls to Airtable.
-      cache.set(redemptionCode, {
-        redemptionCode: record.get('Redemption Code'),
-        establishmentName: record.get('Official Establishment Name'),
-        establishmentType: record.get('Establishment Type'),
-        awardLevel: record.get('Award Level'),
-        redemptionStatus: record.get("Redemption Status"),
-      });
+      cache.set(redemptionCode, responsePayload);
 
       // Send a JSON response containing essential fields from the Airtable record.
-      res.json({
-        redemptionCode: record.get('Redemption Code'),
-        establishmentName: record.get('Official Establishment Name'),
-        establishmentType: record.get('Establishment Type'),
-        awardLevel: record.get('Award Level'),
-        redemptionStatus: record.get("Redemption Status"),
-      });
+      res.json(responsePayload);
     } else {
       // If no records are found, respond with a 404 status code and an error message.
       res.status(404).json({ error: 'Sorry, this redemption code is not valid' });
