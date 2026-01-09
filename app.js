@@ -44,7 +44,9 @@ const allowedOrigins = [
   /^https?:\/\/(www\.)?redeem\.forbestravelguide\.com$/,
   // Newly added ftg-test subdomain(s) for testing environment
   /^https?:\/\/(www\.)?ftg-test\.forbestravelguide\.com$/,
-  /^https?:\/\/(www\.)?ftg-test\.mybrightsites\.com$/
+  /^https?:\/\/(www\.)?ftg-test\.mybrightsites\.com$/,
+  /^https?:\/\/(www\.)?ftg-shop\.mybrightsites\.com$/,
+  /^https?:\/\/(www\.)?shop\.forbestravelguide\.com$/
 ];
 app.use(cors({
   origin: function (origin, callback) {
