@@ -9,7 +9,7 @@ const Airtable = require('airtable');
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base('appC9GXdjmEmFlNk7');
 
 // Define the table name (ID) where your records are stored.
-const tableName = 'tblSsW6kAWQd3LZVa';
+const tableName = 'tbl4YQBCXN4f2WREk';
 
 /**
  * Retrieves an Airtable record matching the given redemption code.
